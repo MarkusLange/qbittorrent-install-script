@@ -42,6 +42,7 @@ ExecStart=/usr/bin/qbittorrent-nox
 WantedBy=multi-user.target
 EOF
 
+#https://github.com/qbittorrent/qBittorrent/issues/10725#issuecomment-1147650959
 cat >/home/$qbittorrent_user/.config/qBittorrent/qBittorrent.conf <<-EOF
 [BitTorrent]
 Session\DefaultSavePath=/srv/Downloads
@@ -91,3 +92,5 @@ EOF
 a2dissite 000-default.conf
 a2ensite qbittorrent.conf
 systemctl reload apache2
+
+su - $stdin_user
