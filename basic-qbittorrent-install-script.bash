@@ -1,7 +1,6 @@
 #!/bin/bash
 #user associated with stdin "who am i"
 stdin_user=$(who -m | cut -d' ' -f1)
-#qbittorrent_user=qbittorrent-nox
 qbittorrent_user=qbituser
 
 apt-get install -y qbittorrent-nox
