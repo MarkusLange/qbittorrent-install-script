@@ -5,6 +5,8 @@ register a systemd service for qBitTorrent, setup apache for port redirection so
 
 This script needs sudo and the used local user added to the group sudo
 
-grep the script file: wget https://raw.githubusercontent.com/MarkusLange/qbittorrent-install-script/main/qbittorrent-install-script
-make it executable: chmod +x qbittorrent-install-script
-start the GUI with: sudo ./qbittorrent-install-script
+grep the script file: `wget https://raw.githubusercontent.com/MarkusLange/qbittorrent-install-script/main/qbittorrent-install-script`
+
+make it executable: `chmod +x qbittorrent-install-script`
+
+start the GUI with: `sudo ./qbittorrent-install-script`
