@@ -10,6 +10,7 @@ adduser $stdin_user $qbittorrent_user
 #usermod --append -G $qbittorrent_user $stdin_user
 
 sudo -u $qbittorrent_user mkdir -p /home/$qbittorrent_user/.config/qBittorrent
+
 mkdir -p /srv/Downloads
 chown $qbittorrent_user:$qbittorrent_user /srv/Downloads
 chmod 770 /srv/Downloads/
