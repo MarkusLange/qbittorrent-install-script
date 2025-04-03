@@ -8,10 +8,13 @@ apt-get install -y qbittorrent-nox
 
 adduser --system --group $qbittorrent_user --home /home/$qbittorrent_user
 adduser $stdin_user $qbittorrent_user
+#usermod --append -G $qbittorrent_user $stdin_user
 
 sudo -u $qbittorrent_user mkdir -p /home/$qbittorrent_user/.config/qBittorrent
-sudo -u $qbittorrent_user mkdir -p /home/$qbittorrent_user/Downloads
-sudo -u $stdin_user ln -s /home/$qbittorrent_user/Downloads /home/$stdin_user/Downloads
+mkdir -p /srv/Downloads
+chown $qbittorrent_user:$qbittorrent_user /srv/Downloads
+chmod 770 /srv/Downloads/
+sudo -u $stdin_user ln -s /srv/Downloads /home/$stdin_user/Downloads
 
 #https://github.com/qbittorrent/qBittorrent/wiki/Running-qBittorrent-without-X-server-(WebUI-only,-systemd-service-set-up,-Ubuntu-15.04-or-newer)
 cat > /etc/systemd/system/qbittorrent.service <<-EOF
@@ -26,6 +29,7 @@ After=network-online.target nss-lookup.target
 Type=exec
 # change user as needed
 User=$qbittorrent_user
+UMask=007
 # The -d flag should not be used in this setup
 ExecStart=/usr/bin/qbittorrent-nox
 # uncomment this for versions of qBittorrent < 4.2.0 to set the maximum number of open files to unlimited
@@ -40,6 +44,7 @@ EOF
 
 cat >/home/$qbittorrent_user/.config/qBittorrent/qBittorrent.conf <<-EOF
 [BitTorrent]
+Session\DefaultSavePath=/srv/Downloads
 Session\QueueingSystemEnabled=false
 
 [LegalNotice]
