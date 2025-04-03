@@ -7,6 +7,6 @@ This script needs sudo and the used local user added to the group sudo
 
 grep the script file: `wget https://raw.githubusercontent.com/MarkusLange/qbittorrent-install-script/refs/heads/main/basic-qbittorrent-install-script.bash`
 
-make it executable: `chmod +x qbittorrent-install-script`
+make it executable: `chmod +x basic-qbittorrent-install-script.bash`
 
-start the GUI with: `sudo ./qbittorrent-install-script`
+start the GUI with: `sudo ./basic-qbittorrent-install-script.bash`
