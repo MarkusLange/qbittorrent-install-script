@@ -3,6 +3,28 @@
 stdin_user=$(who -m | cut -d' ' -f1)
 qbittorrent_user=qbituser
 
+architecture=$(dpkg --print-architecture)
+if [ $1 == "gitupdate" ]
+then
+	echo "Update qBitTorrent precompiled from git https://github.com/userdocs/qbittorrent-nox-static?tab=readme-ov-file"
+	case $architecture in
+		armhf)
+			wget -q --show-progress https://github.com/userdocs/qbittorrent-nox-static/releases/latest/download/armhf-qbittorrent-nox;;
+		arm64)
+			wget -q --show-progress https://github.com/userdocs/qbittorrent-nox-static/releases/latest/download/aarch64-qbittorrent-nox;;
+		amd64)
+			wget -q --show-progress https://github.com/userdocs/qbittorrent-nox-static/releases/latest/download/x86_64-qbittorrent-nox;;
+	esac
+	
+	systemctl stop qbittorrent
+	mv x86_64-qbittorrent-nox qbittorrent-nox
+	chmod 755 qbittorrent-nox
+	chown root:root qbittorrent-nox
+	mv qbittorrent-nox /usr/bin/qbittorrent-nox
+	systemctl start qbittorrent
+	exit 0
+fi
+
 apt-get install -y qbittorrent-nox
 
 adduser --system --group $qbittorrent_user --home /home/$qbittorrent_user
