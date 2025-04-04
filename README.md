@@ -9,4 +9,8 @@ grep the script file: `wget https://raw.githubusercontent.com/MarkusLange/qbitto
 
 make it executable: `chmod +x basic-qbittorrent-install-script.bash`
 
-start the GUI with: `sudo ./basic-qbittorrent-install-script.bash`
+start the script with: `sudo ./basic-qbittorrent-install-script.bash`
+
+Add a updatefunction to the script with `gitupdate` as first value to the script: `sudo ./basic-qbittorrent-install-script.bash gitupdate`
+the script greps a precompiled version of qBitTorrent from https://github.com/userdocs/qbittorrent-nox-static?tab=readme-ov-file and overwrites the
+existing one, implemented for armhf, arm64(aarch64) and amd64
