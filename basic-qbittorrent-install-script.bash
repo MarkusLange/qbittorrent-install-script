@@ -18,10 +18,12 @@ then
 	
 	systemctl stop apache2.service
 	systemctl stop qbittorrent
+	
 	mv x86_64-qbittorrent-nox qbittorrent-nox
 	chmod 755 qbittorrent-nox
 	chown root:root qbittorrent-nox
 	mv qbittorrent-nox /usr/bin/qbittorrent-nox
+	
 	systemctl start qbittorrent
 	systemctl start apache2.service
 	exit 0
