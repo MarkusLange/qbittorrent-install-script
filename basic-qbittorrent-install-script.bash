@@ -3,9 +3,9 @@
 stdin_user=$(who -m | cut -d' ' -f1)
 qbittorrent_user=qbituser
 
-architecture=$(dpkg --print-architecture)
-if [ $1 == "gitupdate" ]
-then
+case $1 in
+gitupdate)
+	architecture=$(dpkg --print-architecture)
 	echo "Update qBitTorrent precompiled from git https://github.com/userdocs/qbittorrent-nox-static?tab=readme-ov-file"
 	case $architecture in
 		armhf)
@@ -17,17 +17,39 @@ then
 	esac
 	
 	systemctl stop apache2.service
-	systemctl stop qbittorrent
+	systemctl stop qbittorrent.service
 	
 	mv *-qbittorrent-nox qbittorrent-nox
 	chmod 755 qbittorrent-nox
 	chown root:root qbittorrent-nox
 	mv qbittorrent-nox /usr/bin/qbittorrent-nox
 	
-	systemctl start qbittorrent
+	systemctl start qbittorrent.service
 	systemctl start apache2.service
-	exit 0
-fi
+	exit 0;;
+remove)
+	echo "Remove qBitTorrent"
+	systemctl stop apache2.service
+	systemctl disable apache2.service
+	systemctl stop qbittorrent.service
+	systemctl disable qbittorrent.service
+	systemctl daemon-reload
+	
+	rm /etc/systemd/system/qbittorrent.service
+	rm /etc/apache2/sites-available/qbittorrent.conf
+	
+	unlink /home/$stdin_user/Torrent-Downloads
+	
+	rm -rf /srv/Downloads
+	rm -rf /home/$qbittorrent_user/.config/qBittorrent
+	
+	deluser $stdin_user $qbittorrent_user
+	deluser --remove-home $qbittorrent_user
+	
+	apt-get purge -y qbittorrent-nox apache2
+	apt-get -y autoremove
+	exit 0;;	
+esac
 
 apt-get install -y qbittorrent-nox
 
@@ -40,7 +62,7 @@ sudo -u $qbittorrent_user mkdir -p /home/$qbittorrent_user/.config/qBittorrent
 mkdir -p /srv/Downloads
 chown $qbittorrent_user:$qbittorrent_user /srv/Downloads
 chmod 770 /srv/Downloads/
-sudo -u $stdin_user ln -s /srv/Downloads /home/$stdin_user/Downloads
+sudo -u $stdin_user ln -s /srv/Downloads /home/$stdin_user/Torrent-Downloads
 
 #https://github.com/qbittorrent/qBittorrent/wiki/Running-qBittorrent-without-X-server-(WebUI-only,-systemd-service-set-up,-Ubuntu-15.04-or-newer)
 cat > /etc/systemd/system/qbittorrent.service <<-EOF
@@ -85,14 +107,14 @@ WebUI\LocalHostAuth=false
 EOF
 
 systemctl daemon-reload
-systemctl enable qbittorrent
-systemctl start qbittorrent
+systemctl enable qbittorrent.service
+systemctl start qbittorrent.service
 
 apt-get -y install apache2
 a2enmod proxy
 a2enmod proxy_http
 
-systemctl restart apache2
+systemctl restart apache2.service
 
 cat > /etc/apache2/sites-available/qbittorrent.conf << EOF
 <VirtualHost *:80>
@@ -117,6 +139,6 @@ EOF
 
 a2dissite 000-default.conf
 a2ensite qbittorrent.conf
-systemctl reload apache2
+systemctl reload apache2.service
 
 su - $stdin_user
