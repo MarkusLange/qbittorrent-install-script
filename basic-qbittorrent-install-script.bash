@@ -38,9 +38,9 @@ remove)
 	rm /etc/systemd/system/qbittorrent.service
 	rm /etc/apache2/sites-available/qbittorrent.conf
 	
-	unlink /home/$stdin_user/Torrent-Downloads
+	unlink /home/$stdin_user/qBitTorrent
 	
-	rm -rf /srv/Downloads
+	rm -rf /srv/qbittorrent/
 	rm -rf /home/$qbittorrent_user/.config/qBittorrent
 	
 	deluser $stdin_user $qbittorrent_user
@@ -59,10 +59,10 @@ adduser $stdin_user $qbittorrent_user
 
 sudo -u $qbittorrent_user mkdir -p /home/$qbittorrent_user/.config/qBittorrent
 
-mkdir -p /srv/Downloads
-chown $qbittorrent_user:$qbittorrent_user /srv/Downloads
-chmod 770 /srv/Downloads/
-sudo -u $stdin_user ln -s /srv/Downloads /home/$stdin_user/Torrent-Downloads
+mkdir -p /srv/qbittorrent/{download,log,.session,watch/start}
+chown -R $qbittorrent_user:$qbittorrent_user /srv/qbittorrent/
+chmod -R 770 /srv/qbittorrent/
+sudo -u $stdin_user ln -s /srv/qbittorrent/ /home/$stdin_user/qBitTorrent
 
 #https://github.com/qbittorrent/qBittorrent/wiki/Running-qBittorrent-without-X-server-(WebUI-only,-systemd-service-set-up,-Ubuntu-15.04-or-newer)
 cat > /etc/systemd/system/qbittorrent.service <<-EOF
@@ -92,8 +92,12 @@ EOF
 
 #https://github.com/qbittorrent/qBittorrent/issues/10725#issuecomment-1147650959
 cat >/home/$qbittorrent_user/.config/qBittorrent/qBittorrent.conf <<-EOF
+[Application]
+FileLogger\Path=/srv/qbittorrent/log
+
 [BitTorrent]
-Session\DefaultSavePath=/srv/Downloads
+Session\DefaultSavePath=/srv/qbittorrent/download
+Session\TorrentExportDirectory=/srv/qbittorrent/.session
 Session\QueueingSystemEnabled=false
 
 [LegalNotice]
@@ -104,6 +108,29 @@ WebUI\AuthSubnetWhitelist=0.0.0.0/0
 WebUI\AuthSubnetWhitelistEnabled=true
 WebUI\UseUPnP=false
 WebUI\LocalHostAuth=false
+EOF
+
+cat >/home/$qbittorrent_user/.config/qBittorrent/watched_folders.json <<-EOF
+{
+    "/srv/qbittorrent/watch/start": {
+        "add_torrent_params": {
+            "category": "",
+            "download_limit": -1,
+            "download_path": "",
+            "inactive_seeding_time_limit": -2,
+            "operating_mode": "AutoManaged",
+            "ratio_limit": -2,
+            "save_path": "/srv/qbittorrent/download",
+            "seeding_time_limit": -2,
+            "skip_checking": false,
+            "tags": [
+            ],
+            "upload_limit": -1,
+            "use_auto_tmm": false
+        },
+        "recursive": false
+    }
+}
 EOF
 
 systemctl daemon-reload
