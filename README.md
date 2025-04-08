@@ -16,6 +16,9 @@ existing one, implemented for armhf, arm64(aarch64) and amd64
 Add a remove-function to the script with `--remove` as first value to the script: `sudo ./basic-qbittorrent-install-script.bash --remove`
 the script removes everthing installed before
 
+Add a reinstall-function to the script with `--reinstall` as first value to the script: `sudo ./basic-qbittorrent-install-script.bash --reinstall`
+the script reinstalls the repository version from qBitTorrent-nox
+
 <pre>
 Parameters:  
   --install,            install qBitTorrent-nox on the system  
