@@ -4,7 +4,7 @@ stdin_user=$(who -m | cut -d' ' -f1)
 qbittorrent_user=qbituser
 
 case $1 in
-gitupdate)
+--gitupdate)
 	architecture=$(dpkg --print-architecture)
 	echo "Update qBitTorrent precompiled from git https://github.com/userdocs/qbittorrent-nox-static?tab=readme-ov-file"
 	case $architecture in
@@ -27,7 +27,7 @@ gitupdate)
 	systemctl start qbittorrent.service
 	systemctl start apache2.service
 	exit 0;;
-remove)
+--remove)
 	echo "Remove qBitTorrent"
 	systemctl stop apache2.service
 	systemctl disable apache2.service
@@ -48,24 +48,32 @@ remove)
 	
 	apt-get purge -y qbittorrent-nox apache2
 	apt-get -y autoremove
-	exit 0;;	
-esac
-
-apt-get install -y qbittorrent-nox
-
-adduser --system --group $qbittorrent_user --home /home/$qbittorrent_user
-adduser $stdin_user $qbittorrent_user
-#usermod --append -G $qbittorrent_user $stdin_user
-
-sudo -u $qbittorrent_user mkdir -p /home/$qbittorrent_user/.config/qBittorrent
-
-mkdir -p /srv/qbittorrent/{download,log,.session,watch/start}
-chown -R $qbittorrent_user:$qbittorrent_user /srv/qbittorrent/
-chmod -R 770 /srv/qbittorrent/
-sudo -u $stdin_user ln -s /srv/qbittorrent/ /home/$stdin_user/qBitTorrent
-
-#https://github.com/qbittorrent/qBittorrent/wiki/Running-qBittorrent-without-X-server-(WebUI-only,-systemd-service-set-up,-Ubuntu-15.04-or-newer)
-cat > /etc/systemd/system/qbittorrent.service <<-EOF
+	exit 0;;
+--reinstall)
+	systemctl stop apache2.service
+	systemctl stop qbittorrent.service
+	
+	apt-get reinstall -y qbittorrent-nox
+	
+	systemctl start qbittorrent.service
+	systemctl start apache2.service
+	exit 0;;
+--install)
+	apt-get install -y qbittorrent-nox
+	
+	adduser --system --group $qbittorrent_user --home /home/$qbittorrent_user
+	adduser $stdin_user $qbittorrent_user
+	#usermod --append -G $qbittorrent_user $stdin_user
+	
+	sudo -u $qbittorrent_user mkdir -p /home/$qbittorrent_user/.config/qBittorrent
+	
+	mkdir -p /srv/qbittorrent/{download,log,.session,watch/start}
+	chown -R $qbittorrent_user:$qbittorrent_user /srv/qbittorrent/
+	chmod -R 770 /srv/qbittorrent/
+	sudo -u $stdin_user ln -s /srv/qbittorrent/ /home/$stdin_user/qBitTorrent
+	
+	#https://github.com/qbittorrent/qBittorrent/wiki/Running-qBittorrent-without-X-server-(WebUI-only,-systemd-service-set-up,-Ubuntu-15.04-or-newer)
+	cat > /etc/systemd/system/qbittorrent.service <<-EOF
 [Unit]
 Description=qBittorrent-nox service
 Documentation=man:qbittorrent-nox(1)
@@ -89,9 +97,9 @@ ExecStart=/usr/bin/qbittorrent-nox
 [Install]
 WantedBy=multi-user.target
 EOF
-
-#https://github.com/qbittorrent/qBittorrent/issues/10725#issuecomment-1147650959
-cat >/home/$qbittorrent_user/.config/qBittorrent/qBittorrent.conf <<-EOF
+	
+	#https://github.com/qbittorrent/qBittorrent/issues/10725#issuecomment-1147650959
+	cat >/home/$qbittorrent_user/.config/qBittorrent/qBittorrent.conf <<-EOF
 [Application]
 FileLogger\Path=/srv/qbittorrent/log
 
@@ -109,63 +117,74 @@ WebUI\AuthSubnetWhitelistEnabled=true
 WebUI\UseUPnP=false
 WebUI\LocalHostAuth=false
 EOF
-
-cat >/home/$qbittorrent_user/.config/qBittorrent/watched_folders.json <<-EOF
+	
+	cat >/home/$qbittorrent_user/.config/qBittorrent/watched_folders.json <<-EOF
 {
-    "/srv/qbittorrent/watch/start": {
-        "add_torrent_params": {
-            "category": "",
-            "download_limit": -1,
-            "download_path": "",
-            "inactive_seeding_time_limit": -2,
-            "operating_mode": "AutoManaged",
-            "ratio_limit": -2,
-            "save_path": "/srv/qbittorrent/download",
-            "seeding_time_limit": -2,
-            "skip_checking": false,
-            "tags": [
-            ],
-            "upload_limit": -1,
-            "use_auto_tmm": false
-        },
-        "recursive": false
-    }
+	"/srv/qbittorrent/watch/start": {
+		"add_torrent_params": {
+			"category": "",
+			"download_limit": -1,
+			"download_path": "",
+			"inactive_seeding_time_limit": -2,
+			"operating_mode": "AutoManaged",
+			"ratio_limit": -2,
+			"save_path": "/srv/qbittorrent/download",
+			"seeding_time_limit": -2,
+			"skip_checking": false,
+			"tags": [
+			],
+			"upload_limit": -1,
+			"use_auto_tmm": false
+		},
+		"recursive": false
+	}
 }
 EOF
-
-systemctl daemon-reload
-systemctl enable qbittorrent.service
-systemctl start qbittorrent.service
-
-apt-get -y install apache2
-a2enmod proxy
-a2enmod proxy_http
-
-systemctl restart apache2.service
-
-cat > /etc/apache2/sites-available/qbittorrent.conf << EOF
+	
+	systemctl daemon-reload
+	systemctl enable qbittorrent.service
+	systemctl start qbittorrent.service
+	
+	apt-get -y install apache2
+	a2enmod proxy
+	a2enmod proxy_http
+	
+	systemctl restart apache2.service
+	
+	cat > /etc/apache2/sites-available/qbittorrent.conf <<-EOF
 <VirtualHost *:80>
-    ServerAdmin info@node-example.com
-    ServerName  node-example.com
-    ServerAlias www.node-example.com
-
-    ProxyRequests off
-
-    <Proxy *>
-            Order deny,allow
-            Allow from all
-    </Proxy>
-
-    <Location />
-            ProxyPass http://localhost:8080/
-            ProxyPassReverse http://localhost:8080/
-    </Location>
-
+	ServerAdmin info@node-example.com
+	ServerName  node-example.com
+	ServerAlias www.node-example.com
+	
+	ProxyRequests off
+	
+	<Proxy *>
+			Order deny,allow
+			Allow from all
+	</Proxy>
+	
+	<Location />
+			ProxyPass http://localhost:8080/
+			ProxyPassReverse http://localhost:8080/
+	</Location>
+	
 </VirtualHost>
 EOF
+	
+	a2dissite 000-default.conf
+	a2ensite qbittorrent.conf
+	systemctl reload apache2.service
+	
+	su - $stdin_user
+	exit 0;;
+esac
 
-a2dissite 000-default.conf
-a2ensite qbittorrent.conf
-systemctl reload apache2.service
-
-su - $stdin_user
+echo "This script has to run as with sudo or as root:"
+echo "    sudo $0"
+echo
+echo "--install,            install qBitTorrent-nox on the system"
+echo "--gitupdate,          grep the latest release from qbittorrent-nox-static"
+echo "--remove,             removes qBitTorrent from the system"
+echo "--reinstall,          reinstall qBitTorrent-nox to the repository version"
+echo
