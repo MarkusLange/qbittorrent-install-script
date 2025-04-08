@@ -16,8 +16,10 @@ existing one, implemented for armhf, arm64(aarch64) and amd64
 Add a remove-function to the script with `--remove` as first value to the script: `sudo ./basic-qbittorrent-install-script.bash remove`
 the script removes everthing installed before
 
-Parameters:<br />
---install,            install qBitTorrent-nox on the system<br />
---gitupdate,          grep the latest release from qbittorrent-nox-static<br />
---remove,             removes qBitTorrent from the system<br />
---reinstall,          reinstall qBitTorrent-nox to the repository version<br />
+<pre>
+Parameters:  
+  --install,            install qBitTorrent-nox on the system  
+  --gitupdate,          grep the latest release from qbittorrent-nox-static  
+  --remove,             removes qBitTorrent from the system  
+  --reinstall,          reinstall qBitTorrent-nox to the repository version  
+</pre>
