@@ -72,6 +72,7 @@ case $1 in
 	chmod -R 770 /srv/qbittorrent/
 	sudo -u $stdin_user ln -s /srv/qbittorrent/ /home/$stdin_user/qBitTorrent
 	
+	#https://saputra.org/threads/how-to-install-qbittorrent-nox-a-headless-and-web-ui-torrent-client.1099/
 	#https://github.com/qbittorrent/qBittorrent/wiki/Running-qBittorrent-without-X-server-(WebUI-only,-systemd-service-set-up,-Ubuntu-15.04-or-newer)
 	cat > /etc/systemd/system/qbittorrent.service <<-EOF
 [Unit]
@@ -180,7 +181,7 @@ EOF
 	exit 0;;
 esac
 
-echo "This script has to run as with sudo or as root:"
+echo "This script has to run with sudo or as root:"
 echo "    sudo $0"
 echo
 echo "--install,            install qBitTorrent-nox on the system"
