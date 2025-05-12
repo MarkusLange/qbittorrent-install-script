@@ -1,4 +1,4 @@
-A very basic qBitTorrent-nox install script.
+A very basic qBitTorrent-nox install script, for debian, and debian based linux
 
 Creats user for qBitTorrent, install qBitTorrent from repository, remove login for qBitTorrent and sets a softlink from qBitTorrent to the actuall user,
 register a systemd service for qBitTorrent, setup apache2 for port redirection so qBitTorrent can be found under port 80.
